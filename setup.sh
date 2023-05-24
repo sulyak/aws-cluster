@@ -1,4 +1,3 @@
-#!/bin/bash
 
 # Check if the script was called with the right parameters
 if [ "$#" -ne 4 ]; then
@@ -37,8 +36,8 @@ while read -r line; do
         master_ip="$line"
         ips+=("$line")
     else
-        worker_ip="${line% *} "  # Extract the worker IP
-        worker_num="${line##* }"  # Extract the worker number
+        worker_ip=$(echo "$line" | awk '{print $1}')
+        worker_num=$(echo "$line" | awk '{print $2}')
 
         if [[ -z "$worker_ip" || -z "$worker_num" ]]; then
             echo "Invalid worker entry: $line"
@@ -79,13 +78,13 @@ for ip in "${workers[@]}"; do
 done
 
 # known hosts 
-for $ip in "${workers[@]}"; do
-    ssh -i $pem_file ubuntu@$master_ip "echo '$(ssh -i $pem_file ubuntu@$ip "ssh-keyscan -H worker_ip | grep -o '^[^#]*'")' | sudo tee -a .ssh/known_hosts"
+for ip in "${workers[@]}"; do
+    ssh -i $pem_file ubuntu@$master_ip "echo '$(ssh -i $pem_file ubuntu@$ip "ssh-keyscan -H $ip | grep -o '^[^#]*'")' | sudo tee -a .ssh/known_hosts"
 done
 
 # copy and compile mpi application file
 for ip in "${ips[@]}"; do
-    scp -i $pem_file -r $mpi_app_path ubuntu@$ip:~
+    scp -i $pem_file -r $src_app_path ubuntu@$ip:~
     ssh -i $pem_file ubuntu@$ip "mpicc $src_app_path -o $app_name"
 done
 

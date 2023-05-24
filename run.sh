@@ -24,7 +24,7 @@ fi
 
 # Read the IP file and validate worker list
 master_ip=""
-workers=()
+slots=()
 ips=()
 
 while read -r line; do
@@ -32,16 +32,16 @@ while read -r line; do
         master_ip="$line"
         ips+=("$line")
     else
-        worker_ip="${line% *} "  # Extract the worker IP
-        worker_num="${line##* }"  # Extract the worker number
+        worker_ip=$(echo "$line" | awk '{print $1}')
+        worker_slots=$(echo "$line" | awk '{print $2}')
 
-        if [[ -z "$worker_ip" || -z "$worker_num" ]]; then
+        if [[ -z "$worker_ip" || -z "$worker_slots" ]]; then
             echo "Invalid worker entry: $line"
             exit 1
         fi
 
         workers+=("$worker_ip")
-        ips+=("$worker_ip")
+        slots+=("$worker_slots")
     fi
 done < "$ip_file"
 
