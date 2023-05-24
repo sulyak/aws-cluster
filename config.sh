@@ -1,15 +1,14 @@
 #!/bin/bash
 
 # Check if the script was called with the right parameters
-if [ "$#" -ne 4 ]; then
-    echo "Usage: $0 <ip_file> <pem_file> <app_name> <num_process>"
+if [ "$#" -ne 3 ]; then
+    echo "Usage: $0 <ip_file> <pem_file> <app_name>"
     exit 1
 fi
 
 ip_file="$1"
 pem_file="$2"
 app_name="$3"
-num_process="$4"
 
 # Check if the files exist
 if [ ! -f "$ip_file" ]; then
@@ -55,7 +54,6 @@ fi
 echo "Master IP: $master_ip"
 echo "Worker IPs: ${workers[@]}"
 echo "PEM file: $pem_file"
-echo "num_process: $num_process"
 echo "app_name: $app_name"
 
 ssh -i $pem_file ubuntu@$master_ip "rm hostfile"
